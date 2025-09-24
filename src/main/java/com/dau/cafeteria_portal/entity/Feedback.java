@@ -6,6 +6,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import lombok.Data;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Data
 public class Feedback {
@@ -16,6 +18,7 @@ public class Feedback {
 
     //either use numeric rating or  enums and map it with rating..
     private Integer rating;
+    private LocalDateTime createdAt;
 
 
 }

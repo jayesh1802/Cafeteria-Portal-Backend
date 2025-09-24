@@ -20,8 +20,7 @@ public class Complaint {
 
     // later update it using enums
     private String status;
-    // add attachment later..
-
+    // add attachment later.
 
 
 }
