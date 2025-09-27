@@ -59,8 +59,8 @@ Response:
 "authority": "ROLE_USER"
 }
 ],
-"token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIyMDIyMDEzNTgiLCJpYXQiOjE3NTg5NjUzNzEsImV4cCI6MTc1ODk2ODk3MX0.KSNXKj3bf_UAtVbEq9DrkXo252F06Pu_p6IIYPuJ4Oc",
-"studentId": "202201358"
+"token": "jwt-token",
+"studentId": "string"
 }
 
 Features
@@ -68,5 +68,3 @@ Features
 Authentication: JWT-based login for secure access.
 
 User Management: Signup and login functionality.
-
-Transparency: Ensures users can securely access their data and operations.
