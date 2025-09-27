@@ -26,19 +26,20 @@ public class SecurityConfig {
 
     private final JWTUtil jwtUtil;
     private final UserDetailsService userDetailsService;
-
-    public SecurityConfig(JWTUtil jwtUtil, UserDetailsService userDetailsService) {
+    private final PasswordEncoder passwordEncoder;
+    public SecurityConfig(JWTUtil jwtUtil, UserDetailsService userDetailsService, PasswordEncoder passwordEncoder) {
         this.jwtUtil = jwtUtil;
         this.userDetailsService = userDetailsService;
+        this.passwordEncoder=passwordEncoder;
     }
 
-    /**
-     * Password encoder for hashing user passwords
-     */
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+//    /**
+//     * Password encoder for hashing user passwords
+//     */
+//    @Bean
+//    public PasswordEncoder passwordEncoder() {
+//        return new BCryptPasswordEncoder();
+//    }
 
     /**
      * Authentication provider using UserDetailsService + BCrypt
@@ -47,7 +48,7 @@ public class SecurityConfig {
     public DaoAuthenticationProvider daoAuthenticationProvider() {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
         provider.setUserDetailsService(userDetailsService);
-        provider.setPasswordEncoder(passwordEncoder());
+        provider.setPasswordEncoder(passwordEncoder);
         return provider;
     }
 

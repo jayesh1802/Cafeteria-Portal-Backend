@@ -12,11 +12,13 @@ import java.time.LocalDateTime;
 @Table(name = "users")
 public class User {
     @Id
-    private String userId;
+    @Column(name = "user_id")
+    private String studentId;
 
     @Column(nullable = false)
-    private String userName;
+    private String name;
 
+//    @Id
     @Column(nullable = false,unique = true)
     private String emailId;
 
