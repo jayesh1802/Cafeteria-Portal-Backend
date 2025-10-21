@@ -6,6 +6,8 @@ Database Design
 <img width="588" height="378" alt="Database Design" src="https://github.com/user-attachments/assets/6bdecbdd-c7d1-46c0-8d30-0ca51d29aa2d" />
 Low-Level Design (LLD)
 <img width="563" height="726" alt="LLD" src="https://github.com/user-attachments/assets/4c180909-6fef-4d9b-9f98-55d1417cf56d" />
+
+
 APIs
 
 Currently, the backend has 2 APIs implemented:

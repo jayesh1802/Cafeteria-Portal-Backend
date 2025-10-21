@@ -6,6 +6,7 @@ import lombok.Data;
 
 import java.nio.file.FileStore;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @Entity
@@ -36,4 +37,7 @@ public class User {
     public void onCreate(){
         this.createdAt=LocalDateTime.now();
     }
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Complaint> complaints;
+
 }

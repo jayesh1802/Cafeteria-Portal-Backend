@@ -1,4 +1,5 @@
 package com.dau.cafeteria_portal.controller;
+
 import com.dau.cafeteria_portal.dto.LoginRequest;
 import com.dau.cafeteria_portal.dto.SignUpRequestDTO;
 import com.dau.cafeteria_portal.entity.User;
@@ -15,16 +16,18 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collection;
 import java.util.Map;
 
 @RestController
 @RequestMapping("/auth")
 @Tag(name = "Authentication API", description = "APIs for user registration and login")
-public class UserAuthController{
+public class UserAuthController {
 
     private final UserServiceImpl userService;
     private final UserDetailsService userDetailsService;
@@ -57,10 +60,12 @@ public class UserAuthController{
             }
     )
     public ResponseEntity<String> register(@RequestBody User user) {
-        // default role
-        user.setUserRole(Role.USER);
+        // Assign default role USER if not specified
+        if (user.getUserRole() == null) {
+            user.setUserRole(Role.USER);
+        }
         userService.save(user);
-        return ResponseEntity.ok("User Registered Successfully");
+        return ResponseEntity.ok("User Registered Successfully with role: " + user.getUserRole());
     }
 
     @PostMapping("/login")
@@ -79,19 +84,28 @@ public class UserAuthController{
     )
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
         try {
-            // here authRequest.userName = email
+            // Authenticate credentials
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(loginRequest.getStudentId(), loginRequest.getPassword())
             );
 
-            // load user by email
+            // Load user details
             UserDetails userDetails = userDetailsService.loadUserByUsername(loginRequest.getStudentId());
-            String token = jwtUtil.generateToken(userDetails.getUsername(), 60);
+
+            // Extract role from authorities
+            Collection<? extends GrantedAuthority> authorities = userDetails.getAuthorities();
+            String role = authorities.stream()
+                    .findFirst()
+                    .map(GrantedAuthority::getAuthority)
+                    .orElse("ROLE_USER");
+
+            // Generate JWT including role claim
+            String token = jwtUtil.generateToken(userDetails.getUsername(), role, 60); // 60 minutes
 
             return ResponseEntity.ok(Map.of(
                     "token", token,
                     "studentId", userDetails.getUsername(),
-                    "roles", userDetails.getAuthorities()
+                    "role", role
             ));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");

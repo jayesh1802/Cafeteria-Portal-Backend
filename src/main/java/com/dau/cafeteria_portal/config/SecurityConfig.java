@@ -1,6 +1,7 @@
 package com.dau.cafeteria_portal.config;
 
 import com.dau.cafeteria_portal.filter.JWTAuthenticationFilter;
+import com.dau.cafeteria_portal.filter.JWTAuthorizationFilter;
 import com.dau.cafeteria_portal.util.JWTUtil;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,7 +12,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -27,22 +27,15 @@ public class SecurityConfig {
     private final JWTUtil jwtUtil;
     private final UserDetailsService userDetailsService;
     private final PasswordEncoder passwordEncoder;
+
     public SecurityConfig(JWTUtil jwtUtil, UserDetailsService userDetailsService, PasswordEncoder passwordEncoder) {
         this.jwtUtil = jwtUtil;
         this.userDetailsService = userDetailsService;
-        this.passwordEncoder=passwordEncoder;
+        this.passwordEncoder = passwordEncoder;
     }
 
-//    /**
-//     * Password encoder for hashing user passwords
-//     */
-//    @Bean
-//    public PasswordEncoder passwordEncoder() {
-//        return new BCryptPasswordEncoder();
-//    }
-
     /**
-     * Authentication provider using UserDetailsService + BCrypt
+     * Authentication provider using UserDetailsService and BCrypt password encoder
      */
     @Bean
     public DaoAuthenticationProvider daoAuthenticationProvider() {
@@ -53,7 +46,7 @@ public class SecurityConfig {
     }
 
     /**
-     * Authentication manager with DAO provider
+     * Authentication manager configured with DAO authentication provider
      */
     @Bean
     public AuthenticationManager authenticationManager() {
@@ -66,31 +59,25 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationManager authenticationManager) throws Exception {
         JWTAuthenticationFilter jwtAuthFilter = new JWTAuthenticationFilter(authenticationManager, jwtUtil);
+        JWTAuthorizationFilter jwtAuthzFilter = new JWTAuthorizationFilter(jwtUtil);
 
         http
-                .cors(cors -> {}) // use default CORS
+                .cors(cors -> {})
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        // Public endpoints
                         .requestMatchers("/auth/register", "/auth/login").permitAll()
-
-                        // Admin-only endpoints
                         .requestMatchers("/admin/**").hasRole("ADMIN")
-
-                        // User-only endpoints
                         .requestMatchers("/user/**").hasRole("USER")
-
-                        // Everything else requires authentication
                         .anyRequest().authenticated()
                 )
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(jwtAuthzFilter, JWTAuthenticationFilter.class); // Runs after login filter
 
         return http.build();
     }
-
     /**
-     * CORS configuration for frontend (React on localhost:3000)
+     * CORS configuration to allow frontend (React on localhost:3000)
      */
     @Bean
     public WebMvcConfigurer corsConfigurer() {
