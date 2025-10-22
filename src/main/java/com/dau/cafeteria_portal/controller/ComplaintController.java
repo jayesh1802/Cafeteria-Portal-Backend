@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -61,7 +62,7 @@ public class ComplaintController {
                     @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content)
             }
     )
-    public ResponseEntity<List<ComplaintDTO>> getMyComplaints(Principal principal) {
+    public ResponseEntity<List<ComplaintDTO>> getMyComplaints( Principal principal) {
         String emailId = principal.getName();
         List<ComplaintDTO> complaints = complaintService.getMyComplaints(emailId);
         return ResponseEntity.ok(complaints);

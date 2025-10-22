@@ -50,4 +50,18 @@ public class ComplaintServiceImpl implements ComplaintService {
     public Optional<ComplaintDTO> getComplaintDetails(Long id) {
         return complaintRepository.findById(id).map(ComplaintMapper::toDTO);
     }
+    @Override
+    public List<ComplaintDTO> getAllComplaints(){
+        return complaintRepository.findAll()
+                .stream()
+                .map(ComplaintMapper::toDTO)
+                .toList();
+    }
+    @Override
+    public void updateComplaintStatus(Long complaintId,ComplaintStatus complaintStatus){
+        Complaint complaint= complaintRepository.findById(complaintId)
+                .orElseThrow(()->new RuntimeException("Complaint not found with Id: "+complaintId));
+        complaint.setComplaintStatus(complaintStatus);
+        complaintRepository.save(complaint);
+    }
 }
