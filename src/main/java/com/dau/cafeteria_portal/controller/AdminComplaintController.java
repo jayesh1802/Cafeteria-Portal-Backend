@@ -19,7 +19,6 @@ public class AdminComplaintController {
         this.complaintService=complaintService;
     }
 
-
     @GetMapping("/allComplaints")
     public ResponseEntity<List<ComplaintDTO>> getAllComplaints()
     {
@@ -36,6 +35,7 @@ public class AdminComplaintController {
         complaintService.updateComplaintStatus(complaintId, status);
         return ResponseEntity.ok("Complaint status updated successfully");
     }
+    // Escalate the complaints APIs...
 
 
 }
