@@ -1,9 +1,11 @@
 package com.dau.cafeteria_portal.controller;
 
 import com.dau.cafeteria_portal.dto.ComplaintDTO;
+import com.dau.cafeteria_portal.entity.Complaint;
 import com.dau.cafeteria_portal.enums.ComplaintStatus;
 import com.dau.cafeteria_portal.repository.ComplaintRepository;
 import com.dau.cafeteria_portal.service.ComplaintService;
+import com.dau.cafeteria_portal.service.EscalationMailService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -36,6 +38,17 @@ public class AdminComplaintController {
         return ResponseEntity.ok("Complaint status updated successfully");
     }
     // Escalate the complaints APIs...
+    @PostMapping("/{id}/escalate")
+    public ResponseEntity<String>escalateComplaint(@PathVariable Long id){
+        try{
+            String response = complaintService.escalateComplaint(id);
+            return ResponseEntity.ok(response);
+        }catch (Exception e) {
+            return ResponseEntity.status(500)
+                    .body("Error while escalating complaint: " + e.getMessage());
+        }
+
+    }
 
 
 }

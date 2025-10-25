@@ -14,4 +14,6 @@ public interface ComplaintService {
     // for admin only.
     public List<ComplaintDTO> getAllComplaints();
     public void updateComplaintStatus(Long complaintId, ComplaintStatus complaintStatus);
+    public String escalateComplaint(Long complaintId);
+
 }
