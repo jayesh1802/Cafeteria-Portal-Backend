@@ -1,10 +1,9 @@
 package com.dau.cafeteria_portal.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.Data;
+
+import java.util.List;
 
 @Entity
 @Data
@@ -18,4 +17,6 @@ public class Canteen {
     // attachment photo of canteen..
     private String fssaiCertificateUrl;
     private String imageUrl;
+    @OneToMany(mappedBy = "canteen",cascade = CascadeType.ALL)
+    private List<FeedbackQuestion> feedbackQuestions;
 }
