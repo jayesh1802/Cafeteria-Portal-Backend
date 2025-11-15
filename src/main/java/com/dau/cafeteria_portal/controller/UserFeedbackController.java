@@ -25,9 +25,12 @@ public class UserFeedbackController {
     }
 
     // Submit feedback for multiple questions
-    @PostMapping("/submit")
-    public ResponseEntity<String> submitFeedback(@RequestBody List<FeedbackSubmissionDTO> submissions) {
-        feedbackService.submitFeedback(submissions);
+    @PostMapping("/canteen/{canteenId}/submit")
+    public ResponseEntity<String> submitFeedback(
+            @PathVariable Long canteenId,
+            @RequestBody List<FeedbackSubmissionDTO> submissions) {
+
+        feedbackService.submitFeedback(canteenId, submissions);
         return ResponseEntity.ok("Feedback submitted successfully");
     }
 }

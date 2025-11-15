@@ -16,5 +16,5 @@ public interface FeedbackService {
 
     // User
     List<FeedbackQuestion> getQuestionsByCanteen(Long canteenId);
-    void submitFeedback(List<FeedbackSubmissionDTO> submissions);
+    void submitFeedback(Long canteenId, List<FeedbackSubmissionDTO> submissions);
 }

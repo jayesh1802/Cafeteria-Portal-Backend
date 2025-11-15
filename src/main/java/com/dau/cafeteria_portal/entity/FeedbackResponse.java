@@ -20,4 +20,7 @@ public class FeedbackResponse {
 
     private String reason;
 
+    @ManyToOne
+    @JoinColumn(name = "canteen_id")
+    private Canteen canteen;
 }

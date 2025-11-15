@@ -75,10 +75,21 @@ public class FeedbackServiceImpl implements FeedbackService {
 
     // User: Submit feedback
     @Override
-    public void submitFeedback(List<FeedbackSubmissionDTO> submissions) {
+    public void submitFeedback(Long canteenId, List<FeedbackSubmissionDTO> submissions) {
+
+        Canteen canteen = canteenRepo.findById(canteenId)
+                .orElseThrow(() -> new RuntimeException("Canteen not found"));
+
         for (FeedbackSubmissionDTO dto : submissions) {
+
             FeedbackQuestion question = questionRepo.findById(dto.getQuestionId())
                     .orElseThrow(() -> new RuntimeException("Question not found"));
+
+            // Validate: question must belong to canteen
+            if (!question.getCanteen().getId().equals(canteenId)) {
+                throw new RuntimeException("Question " + dto.getQuestionId() +
+                        " does not belong to canteen " + canteenId);
+            }
 
             FeedbackResponse response = new FeedbackResponse();
             response.setQuestion(question);
