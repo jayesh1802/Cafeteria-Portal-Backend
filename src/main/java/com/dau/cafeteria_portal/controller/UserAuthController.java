@@ -1,9 +1,12 @@
 package com.dau.cafeteria_portal.controller;
 
-import com.dau.cafeteria_portal.dto.LoginRequest;
-import com.dau.cafeteria_portal.dto.SignUpRequestDTO;
+import com.dau.cafeteria_portal.dto.*;
+import com.dau.cafeteria_portal.entity.OtpVerification;
 import com.dau.cafeteria_portal.entity.User;
 import com.dau.cafeteria_portal.enums.Role;
+import com.dau.cafeteria_portal.repository.OtpVerificationRepository;
+import com.dau.cafeteria_portal.service.ForgotPasswordService;
+import com.dau.cafeteria_portal.service.OtpService;
 import com.dau.cafeteria_portal.service.impl.UserServiceImpl;
 import com.dau.cafeteria_portal.util.JWTUtil;
 import io.swagger.v3.oas.annotations.Operation;
@@ -33,16 +36,23 @@ public class UserAuthController {
     private final UserDetailsService userDetailsService;
     private final AuthenticationManager authenticationManager;
     private final JWTUtil jwtUtil;
+    private final OtpService otpService;
+    private final OtpVerificationRepository otpVerificationRepository;
 
     @Autowired
     public UserAuthController(UserServiceImpl userService,
                               UserDetailsService userDetailsService,
                               AuthenticationManager authenticationManager,
-                              JWTUtil jwtUtil) {
+                              JWTUtil jwtUtil,
+                              OtpService otpService,
+                              OtpVerificationRepository otpVerificationRepository
+                             ) {
         this.userService = userService;
         this.userDetailsService = userDetailsService;
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
+        this.otpService=otpService;
+        this.otpVerificationRepository=otpVerificationRepository;
     }
 
     @PostMapping("/register")
@@ -64,9 +74,36 @@ public class UserAuthController {
         if (user.getUserRole() == null) {
             user.setUserRole(Role.USER);
         }
+        OtpVerification otpEntity = otpVerificationRepository.findByEmail(user.getEmailId())
+                .orElseThrow(() -> new RuntimeException("OTP not found"));
+
+        if (!otpEntity.isVerified()) {
+            return ResponseEntity.badRequest().body("Email not verified!");
+        }
         userService.save(user);
         return ResponseEntity.ok("User Registered Successfully with role: " + user.getUserRole());
     }
+
+
+    // send OTP
+    @PostMapping("/send-otp")
+    public ResponseEntity<?> sendOtp(@RequestBody SendOtpRequest request) {
+        return ResponseEntity.ok(otpService.generateOtp(request.getEmail()));
+    }
+
+
+    // verify OTP
+    @PostMapping("/verify-otp")
+    public ResponseEntity<?> verifyOtp(@RequestBody VerifyOtpRequest req) {
+        boolean result = otpService.verifyOtp(req.getEmail(), req.getOtp());
+
+        if (!result) {
+            return ResponseEntity.badRequest().body(result);
+        }
+
+        return ResponseEntity.ok(result);
+    }
+
 
     @PostMapping("/login")
     @Operation(
@@ -111,4 +148,6 @@ public class UserAuthController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
         }
     }
+
+
 }

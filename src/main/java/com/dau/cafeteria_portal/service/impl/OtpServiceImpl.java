@@ -1,0 +1,73 @@
+package com.dau.cafeteria_portal.service.impl;
+
+import com.dau.cafeteria_portal.entity.OtpVerification;
+import com.dau.cafeteria_portal.repository.OtpVerificationRepository;
+import com.dau.cafeteria_portal.service.OtpService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.Random;
+
+@Service
+@RequiredArgsConstructor
+public class OtpServiceImpl implements OtpService {
+
+    private final JavaMailSender mailSender;
+    private final OtpVerificationRepository otpRepo;
+
+    public String generateOtp(String email) {
+
+        String otp = String.valueOf(new Random().nextInt(900000) + 100000);
+
+        OtpVerification otpEntity = otpRepo.findByEmail(email)
+                .orElse(new OtpVerification());
+
+        otpEntity.setEmail(email);
+        otpEntity.setOtp(otp);
+        otpEntity.setExpiryTime(LocalDateTime.now().plusMinutes(5));
+        otpEntity.setVerified(false);
+
+        otpRepo.save(otpEntity);
+
+        sendOtpEmail(email, otp);
+        return "OTP sent successfully!";
+    }
+
+     public void sendOtpEmail(String toEmail, String otp) {
+
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(toEmail);
+        message.setSubject("Your OTP for Signup Verification");
+        message.setText("Your OTP is: " + otp + "\nIt is valid for 5 minutes.");
+
+        mailSender.send(message);
+    }
+    public boolean verifyOtp(String email, String otp) {
+
+        OtpVerification otpEntity = otpRepo.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("OTP not generated"));
+
+        if (otpEntity.getExpiryTime().isBefore(LocalDateTime.now())) {
+            throw new RuntimeException("OTP expired!");
+        }
+
+        if (!otpEntity.getOtp().equals(otp)) {
+            throw new RuntimeException("Invalid OTP!");
+        }
+
+        otpEntity.setVerified(true);
+        otpRepo.save(otpEntity);
+
+        return true;
+    }
+    @Scheduled(fixedRate = 600000)   // Every 10 minutes
+    public void cleanupExpiredOtps() {
+        otpRepo.deleteExpiredOtps(LocalDateTime.now());
+    }
+
+}
+
