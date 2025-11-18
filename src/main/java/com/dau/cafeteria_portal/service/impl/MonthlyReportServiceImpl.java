@@ -42,20 +42,15 @@ public class MonthlyReportServiceImpl implements MonthlyReportService {
 
         List<CanteenReportDataDTO> reportList = new ArrayList<>();
 
-        System.out.println("------ GENERATING MONTHLY REPORT FOR: " + monthName + " ------");
 
         for (Canteen canteen : canteens) {
 
-            System.out.println("\n===============================");
-            System.out.println("CANTEEN: " + canteen.getCanteenName());
-            System.out.println("===============================");
 
             // Fetch complaints
             List<Complaint> complaints =
                     complaintRepository.findAllByCanteen_CanteenIdAndCreatedAtBetween(
                             canteen.getCanteenId(), start, end);
 
-            System.out.println("\n📌 Complaints found: " + complaints.size());
 
             List<ReportComplaintDTO> complaintDTOs = complaints.stream()
                     .map(c -> {
@@ -70,7 +65,6 @@ public class MonthlyReportServiceImpl implements MonthlyReportService {
                     feedbackResponseRepository.findAllByCanteen_CanteenIdAndCreatedAtBetween(
                             canteen.getCanteenId(), start, end);
 
-            System.out.println("\n📌 Feedback responses found: " + responses.size());
 
             Map<String, List<Integer>> questionRatings = new HashMap<>();
             Map<String, List<String>> questionReasons = new HashMap<>();
@@ -80,8 +74,6 @@ public class MonthlyReportServiceImpl implements MonthlyReportService {
                 String qText = fr.getQuestion().getQuestionText();
                 int rating = fr.getOption().getRating();
 
-                System.out.println(" - Feedback: [" + qText + "] | Rating = " + rating +
-                        " | Reason = " + fr.getReason());
 
                 questionRatings.computeIfAbsent(qText, k -> new ArrayList<>()).add(rating);
 
@@ -93,17 +85,12 @@ public class MonthlyReportServiceImpl implements MonthlyReportService {
             // Build feedback summary
             List<ReportFeedbackDTO> feedbackSummary = new ArrayList<>();
 
-            System.out.println("\n📊 Feedback Summary:");
 
             for (String question : questionRatings.keySet()) {
 
                 List<Integer> ratings = questionRatings.get(question);
                 double avg = ratings.stream().mapToInt(i -> i).average().orElse(0.0);
 
-                System.out.println(" - Question: " + question);
-                System.out.println("   Ratings: " + ratings);
-                System.out.println("   Average: " + avg);
-                System.out.println("   Reasons: " + questionReasons.getOrDefault(question, List.of()));
 
                 feedbackSummary.add(
                         new ReportFeedbackDTO(
@@ -122,12 +109,10 @@ public class MonthlyReportServiceImpl implements MonthlyReportService {
                     feedbackSummary
             );
 
-            System.out.println("\n✅ Finished processing canteen: " + canteen.getCanteenName());
 
             reportList.add(canteenReport);
         }
 
-        System.out.println("\n------ FINAL REPORT READY ------");
 
         return new MonthlyReportDTO(monthName, reportList);
     }

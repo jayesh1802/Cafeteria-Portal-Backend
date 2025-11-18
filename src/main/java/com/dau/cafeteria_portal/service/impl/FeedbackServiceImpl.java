@@ -97,6 +97,7 @@ public class FeedbackServiceImpl implements FeedbackService {
             response.setOption(dto.getOption());
             response.setReason(dto.getReason());
             response.setCreatedAt(LocalDateTime.now());
+            response.setCanteen(question.getCanteen());
             responseRepo.save(response);
         }
     }

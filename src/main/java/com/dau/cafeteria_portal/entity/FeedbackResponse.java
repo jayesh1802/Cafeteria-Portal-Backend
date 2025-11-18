@@ -22,6 +22,7 @@ public class FeedbackResponse {
 
     private String reason;
     private LocalDateTime createdAt;
+
     @ManyToOne
     @JoinColumn(name = "canteen_id")
     private Canteen canteen;
