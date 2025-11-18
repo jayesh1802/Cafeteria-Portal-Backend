@@ -48,7 +48,8 @@ public class ComplaintController {
             Principal principal) {
 
         String emailId = principal.getName(); // from JWT or session
-        ComplaintDTO created = complaintService.createComplaint(complaintDTO, emailId);
+        Long canteenId=complaintDTO.getCanteenId();
+        ComplaintDTO created = complaintService.createComplaint(complaintDTO, emailId,canteenId);
         return ResponseEntity.ok(created);
     }
 

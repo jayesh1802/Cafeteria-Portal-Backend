@@ -4,6 +4,8 @@ import com.dau.cafeteria_portal.enums.FeedbackOption;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Data
 public class FeedbackResponse {
@@ -19,7 +21,7 @@ public class FeedbackResponse {
     private FeedbackOption option;
 
     private String reason;
-
+    private LocalDateTime createdAt;
     @ManyToOne
     @JoinColumn(name = "canteen_id")
     private Canteen canteen;

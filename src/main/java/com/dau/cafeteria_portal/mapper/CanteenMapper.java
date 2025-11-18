@@ -11,7 +11,7 @@ public class CanteenMapper {
         if (canteen == null) return null;
 
         CanteenDTO dto = new CanteenDTO();
-        dto.setId(canteen.getId());
+        dto.setId(canteen.getCanteenId());
         dto.setCanteenName(canteen.getCanteenName());
         dto.setInfo(canteen.getInfo());
         dto.setFssaiCertificateUrl(canteen.getFssaiCertificateUrl());
@@ -23,7 +23,7 @@ public class CanteenMapper {
         if (dto == null) return null;
 
         Canteen canteen = new Canteen();
-        canteen.setId(dto.getId());
+        canteen.setCanteenId(dto.getId());
         canteen.setCanteenName(dto.getCanteenName());
         canteen.setInfo(dto.getInfo());
         canteen.setFssaiCertificateUrl(dto.getFssaiCertificateUrl());

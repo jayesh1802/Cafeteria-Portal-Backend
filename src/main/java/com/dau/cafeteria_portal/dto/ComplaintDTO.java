@@ -17,4 +17,5 @@ public class ComplaintDTO {
     private LocalDateTime createdAt;
     private ComplaintStatus complaintStatus;
     private String emailId;
+    private Long CanteenId;
 }

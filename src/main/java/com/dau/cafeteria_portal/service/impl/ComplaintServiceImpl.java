@@ -1,10 +1,12 @@
 package com.dau.cafeteria_portal.service.impl;
 
 import com.dau.cafeteria_portal.dto.ComplaintDTO;
+import com.dau.cafeteria_portal.entity.Canteen;
 import com.dau.cafeteria_portal.entity.Complaint;
 import com.dau.cafeteria_portal.entity.User;
 import com.dau.cafeteria_portal.enums.ComplaintStatus;
 import com.dau.cafeteria_portal.mapper.ComplaintMapper;
+import com.dau.cafeteria_portal.repository.CanteenRepository;
 import com.dau.cafeteria_portal.repository.ComplaintRepository;
 import com.dau.cafeteria_portal.repository.UserRepository;
 import com.dau.cafeteria_portal.service.ComplaintService;
@@ -25,17 +27,21 @@ public class ComplaintServiceImpl implements ComplaintService {
     private final ComplaintRepository complaintRepository;
     @Autowired
     private final UserRepository userRepository;
+
+    @Autowired
+    private final CanteenRepository canteenRepository;
     @Autowired
     private EscalationMailService escalationMailService;
 
 
     @Override
-    public ComplaintDTO createComplaint(ComplaintDTO dto, String emailId) {
+    public ComplaintDTO createComplaint(ComplaintDTO dto, String emailId,Long canteenId) {
         // find the user by emailId
         User user = userRepository.findByEmailId(emailId)
                 .orElseThrow(() -> new RuntimeException("User not found with email: " + emailId));
-
-        Complaint complaint = ComplaintMapper.toEntity(dto, user);
+        Canteen canteen=canteenRepository.findById(canteenId)
+                .orElseThrow(()->new RuntimeException("Canteen not found "));
+        Complaint complaint = ComplaintMapper.toEntity(dto, user,canteen);
         complaint.setComplaintStatus(ComplaintStatus.PENDING); // default
 
         Complaint saved = complaintRepository.save(complaint);

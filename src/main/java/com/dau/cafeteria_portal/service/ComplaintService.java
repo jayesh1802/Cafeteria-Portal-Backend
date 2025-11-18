@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ComplaintService {
-    public ComplaintDTO createComplaint(ComplaintDTO dto, String emailId);
+    public ComplaintDTO createComplaint(ComplaintDTO dto, String emailId,Long canteenId);
     public List<ComplaintDTO> getMyComplaints(String emailId);
     public Optional<ComplaintDTO> getComplaintDetails(Long id);
 

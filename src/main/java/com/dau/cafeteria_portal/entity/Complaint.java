@@ -28,4 +28,8 @@ public class Complaint {
     @ManyToOne(fetch = FetchType.LAZY)   // many complaints belong to one user
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
+    @ManyToOne(fetch=FetchType.LAZY) // one canteen can have many complaints.
+    @JoinColumn(name="canteen_id",nullable = false)
+    private Canteen canteen;
 }

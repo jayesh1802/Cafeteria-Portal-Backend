@@ -1,6 +1,7 @@
 package com.dau.cafeteria_portal.mapper;
 
 import com.dau.cafeteria_portal.dto.ComplaintDTO;
+import com.dau.cafeteria_portal.entity.Canteen;
 import com.dau.cafeteria_portal.entity.Complaint;
 import com.dau.cafeteria_portal.entity.User;
 
@@ -16,11 +17,12 @@ public class ComplaintMapper {
                 complaint.getDescription(),
                 complaint.getCreatedAt(),
                 complaint.getComplaintStatus(),
-                complaint.getUser() != null ? complaint.getUser().getEmailId() : null
+                complaint.getUser() != null ? complaint.getUser().getEmailId() : null,
+                complaint.getCanteen()!=null?complaint.getCanteen().getCanteenId():null
         );
     }
 
-    public static Complaint toEntity(ComplaintDTO dto, User user) {
+    public static Complaint toEntity(ComplaintDTO dto, User user, Canteen canteen) {
         if (dto == null) {
             return null;
         }
@@ -31,6 +33,7 @@ public class ComplaintMapper {
         complaint.setCreatedAt(dto.getCreatedAt());
         complaint.setComplaintStatus(dto.getComplaintStatus());
         complaint.setUser(user);
+        complaint.setCanteen(canteen);
         return complaint;
     }
 }

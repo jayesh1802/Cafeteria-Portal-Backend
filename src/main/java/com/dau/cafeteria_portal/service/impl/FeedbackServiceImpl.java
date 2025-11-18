@@ -12,6 +12,7 @@ import com.dau.cafeteria_portal.service.FeedbackService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -70,7 +71,7 @@ public class FeedbackServiceImpl implements FeedbackService {
     // 🟢 User: Get all feedback questions for a canteen
     @Override
     public List<FeedbackQuestion> getQuestionsByCanteen(Long canteenId) {
-        return questionRepo.findByCanteenId(canteenId);
+        return questionRepo.findByCanteen_CanteenId(canteenId);
     }
 
     // User: Submit feedback
@@ -86,7 +87,7 @@ public class FeedbackServiceImpl implements FeedbackService {
                     .orElseThrow(() -> new RuntimeException("Question not found"));
 
             // Validate: question must belong to canteen
-            if (!question.getCanteen().getId().equals(canteenId)) {
+            if (!question.getCanteen().getCanteenId().equals(canteenId)) {
                 throw new RuntimeException("Question " + dto.getQuestionId() +
                         " does not belong to canteen " + canteenId);
             }
@@ -95,7 +96,7 @@ public class FeedbackServiceImpl implements FeedbackService {
             response.setQuestion(question);
             response.setOption(dto.getOption());
             response.setReason(dto.getReason());
-
+            response.setCreatedAt(LocalDateTime.now());
             responseRepo.save(response);
         }
     }
