@@ -4,10 +4,13 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.aot.generate.GeneratedMethod;
 
 @Entity
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class FeedbackQuestion {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
