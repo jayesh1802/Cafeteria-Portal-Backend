@@ -1,4 +1,5 @@
 package com.dau.cafeteria_portal.service.impl;
+import com.dau.cafeteria_portal.dto.ProfileResponseDTO;
 import com.dau.cafeteria_portal.dto.UserDto;
 import com.dau.cafeteria_portal.entity.User;
 import com.dau.cafeteria_portal.mapper.UserMapper;
@@ -56,5 +57,15 @@ public class UserServiceImpl implements UserService, UserDetailsService {
                 .password(user.getPassword())
                 .roles(user.getUserRole().name().replace("ROLE_", ""))
                 .build();
+    }
+    @Override
+    public ProfileResponseDTO getProfile(String emailId) {
+        User user = userRepository.findByEmailId(emailId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        return new ProfileResponseDTO(
+                user.getEmailId(),
+                user.getMobileNumber(),
+                user.getName()
+        );
     }
 }

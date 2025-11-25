@@ -24,6 +24,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.Collection;
 import java.util.Map;
 
@@ -119,6 +120,8 @@ public class UserAuthController {
                     @ApiResponse(responseCode = "401", description = "Invalid credentials", content = @Content)
             }
     )
+
+
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
         try {
             // Authenticate credentials
@@ -148,6 +151,8 @@ public class UserAuthController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
         }
     }
+
+
 
 
 }

@@ -21,4 +21,5 @@ public class Canteen {
     private List<FeedbackQuestion> feedbackQuestions;
     @OneToMany(mappedBy = "canteen",cascade = CascadeType.ALL)
     private List<Complaint> complaints;
+    // add isAvailable/ visible for user(general complaints )
 }
