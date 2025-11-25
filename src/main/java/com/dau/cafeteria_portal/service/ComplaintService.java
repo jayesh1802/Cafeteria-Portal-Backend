@@ -2,18 +2,20 @@ package com.dau.cafeteria_portal.service;
 
 import com.dau.cafeteria_portal.dto.ComplaintDTO;
 import com.dau.cafeteria_portal.enums.ComplaintStatus;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface ComplaintService {
-    public ComplaintDTO createComplaint(ComplaintDTO dto, String emailId,Long canteenId);
-    public List<ComplaintDTO> getMyComplaints(String emailId);
-    public Optional<ComplaintDTO> getComplaintDetails(Long id);
-
+    ComplaintDTO createComplaint(ComplaintDTO dto, String emailId, Long canteenId);
+    List<ComplaintDTO> getMyComplaints(String emailId);
+    Optional<ComplaintDTO> getComplaintDetails(Long id);
+    void attachFile(Long complaintId, String fileKey, String emailId);
     // for admin only.
-    public List<ComplaintDTO> getAllComplaints();
-    public void updateComplaintStatus(Long complaintId, ComplaintStatus complaintStatus);
-    public String escalateComplaint(Long complaintId);
+     List<ComplaintDTO> getAllComplaints();
+     void updateComplaintStatus(Long complaintId, ComplaintStatus complaintStatus);
+    String escalateComplaint(Long complaintId);
+    String getAdminDownloadUrl(Long id);
 
 }

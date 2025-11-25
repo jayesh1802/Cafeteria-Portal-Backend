@@ -11,10 +11,12 @@ import com.dau.cafeteria_portal.repository.ComplaintRepository;
 import com.dau.cafeteria_portal.repository.UserRepository;
 import com.dau.cafeteria_portal.service.ComplaintService;
 import com.dau.cafeteria_portal.service.EscalationMailService;
+import com.dau.cafeteria_portal.service.S3Service;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Optional;
@@ -32,10 +34,12 @@ public class ComplaintServiceImpl implements ComplaintService {
     private final CanteenRepository canteenRepository;
     @Autowired
     private EscalationMailService escalationMailService;
+    @Autowired
+    private final S3Service s3Service;
 
 
     @Override
-    public ComplaintDTO createComplaint(ComplaintDTO dto, String emailId,Long canteenId) {
+    public ComplaintDTO createComplaint(ComplaintDTO dto, String emailId, Long canteenId) {
         // find the user by emailId
         User user = userRepository.findByEmailId(emailId)
                 .orElseThrow(() -> new RuntimeException("User not found with email: " + emailId));
@@ -46,7 +50,18 @@ public class ComplaintServiceImpl implements ComplaintService {
 
         Complaint saved = complaintRepository.save(complaint);
 
-        return ComplaintMapper.toDTO(saved);
+        // If user will upload an image, provide a key and upload URL.
+        // We don't enforce uploading - user may skip file.
+        String generatedKey=s3Service.buildKeyForComplaint(saved.getComplainId(), "upload");
+        saved.setImageKey(generatedKey);
+        saved = complaintRepository.save(saved);
+
+        String uploadUrl = s3Service.generatePresignedUploadUrl(generatedKey);
+
+        ComplaintDTO result = ComplaintMapper.toDTO(saved);
+        result.setUploadUrl(uploadUrl);
+        result.setImageKey(generatedKey);
+        return result;
     }
 
     @Override
@@ -79,6 +94,13 @@ public class ComplaintServiceImpl implements ComplaintService {
         complaintRepository.save(complaint);
     }
     @Override
+    public String getAdminDownloadUrl(Long id) {
+        Complaint c = complaintRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Complaint not found"));
+        if (c.getImageKey() == null) throw new RuntimeException("No image present");
+        return s3Service.generatePresignedDownloadUrl(c.getImageKey());
+    }
+    @Override
     public String escalateComplaint(Long complaintId){
         Complaint complaint = complaintRepository.findById(complaintId)
                 .orElseThrow(() -> new RuntimeException("Complaint not found"));
@@ -107,5 +129,19 @@ public class ComplaintServiceImpl implements ComplaintService {
         }
 
     }
+    @Override
+    public void attachFile(Long complaintId, String fileKey, String emailId) {
+        Complaint c = complaintRepository.findById(complaintId)
+                .orElseThrow(() -> new RuntimeException("Complaint not found"));
+
+        // Optional: validate owner
+        if (!c.getUser().getEmailId().equals(emailId)) {
+            throw new RuntimeException("Unauthorized");
+        }
+
+        c.setImageKey(fileKey);
+        complaintRepository.save(c);
+    }
+
 
 }

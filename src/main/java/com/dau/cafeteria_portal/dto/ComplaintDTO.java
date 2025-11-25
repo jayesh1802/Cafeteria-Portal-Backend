@@ -18,4 +18,9 @@ public class ComplaintDTO {
     private ComplaintStatus complaintStatus;
     private String emailId;
     private Long CanteenId;
+    // for user uploading
+    private String uploadUrl;   // returned after create
+    // for user downloading..
+    private String downloadUrl; // returned for admin
+    private String imageKey;
 }

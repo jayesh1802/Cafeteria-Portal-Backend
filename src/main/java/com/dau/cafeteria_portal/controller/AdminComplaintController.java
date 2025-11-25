@@ -50,5 +50,11 @@ public class AdminComplaintController {
 
     }
 
+    @GetMapping("/{id}/image-url")
+    public ResponseEntity<String> getImageUrl(@PathVariable Long id) {
+        String url = complaintService.getAdminDownloadUrl(id);
+        return ResponseEntity.ok(url);
+    }
+
 
 }

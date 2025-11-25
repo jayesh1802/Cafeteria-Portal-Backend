@@ -32,4 +32,8 @@ public class Complaint {
     @ManyToOne(fetch=FetchType.LAZY) // one canteen can have many complaints.
     @JoinColumn(name="canteen_id",nullable = false)
     private Canteen canteen;
+
+    // Only store S3 object key (not full URL)
+    private String imageKey;
 }
+

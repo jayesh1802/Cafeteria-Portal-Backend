@@ -84,4 +84,14 @@ public class ComplaintController {
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
+    @PostMapping("/{id}/attach")
+    public ResponseEntity<String> attachFileToComplaint(
+            @PathVariable Long id,
+            @RequestParam String fileKey,
+            Principal principal) {
+
+        complaintService.attachFile(id, fileKey, principal.getName());
+        return ResponseEntity.ok("File attached successfully");
+    }
+
 }

@@ -7,19 +7,16 @@ import com.dau.cafeteria_portal.entity.User;
 
 public class ComplaintMapper {
 
-    public static ComplaintDTO toDTO(Complaint complaint) {
-        if (complaint == null) {
-            return null;
-        }
-        return new ComplaintDTO(
-                complaint.getComplainId(),
-                complaint.getTitle(),
-                complaint.getDescription(),
-                complaint.getCreatedAt(),
-                complaint.getComplaintStatus(),
-                complaint.getUser() != null ? complaint.getUser().getEmailId() : null,
-                complaint.getCanteen()!=null?complaint.getCanteen().getCanteenId():null
-        );
+    public static ComplaintDTO toDTO(Complaint c) {
+        if (c == null) return null;
+        ComplaintDTO dto = new ComplaintDTO();
+        dto.setComplainId(c.getComplainId());
+        dto.setTitle(c.getTitle());
+        dto.setDescription(c.getDescription());
+        dto.setComplaintStatus(c.getComplaintStatus());
+        dto.setImageKey(c.getImageKey());
+        if (c.getCanteen() != null) dto.setCanteenId(c.getCanteen().getCanteenId());
+        return dto;
     }
 
     public static Complaint toEntity(ComplaintDTO dto, User user, Canteen canteen) {
