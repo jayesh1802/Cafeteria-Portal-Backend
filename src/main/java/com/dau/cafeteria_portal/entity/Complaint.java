@@ -1,6 +1,7 @@
 package com.dau.cafeteria_portal.entity;
 
 import com.dau.cafeteria_portal.enums.ComplaintStatus;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -25,8 +26,11 @@ public class Complaint {
     public void onCreate(){
         this.createdAt=LocalDateTime.now();
     }
+
+
     @ManyToOne(fetch = FetchType.LAZY)   // many complaints belong to one user
     @JoinColumn(name = "user_id", nullable = false)
+    @JsonIgnore
     private User user;
 
     @ManyToOne(fetch=FetchType.LAZY) // one canteen can have many complaints.

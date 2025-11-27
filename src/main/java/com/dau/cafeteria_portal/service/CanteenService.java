@@ -11,4 +11,13 @@ public interface CanteenService {
     public void updateCanteen(Long id, CanteenDTO updatedCanteen);
     public void deleteCanteen(Long id);
 
+
+    // File updates
+    void updateCanteenImage(Long id, String imagePath);
+    void updateFssaiCertificate(Long id, String certificatePath);
+    void updateMenuFile(Long id, String menuPath);
+
+
+
+
 }

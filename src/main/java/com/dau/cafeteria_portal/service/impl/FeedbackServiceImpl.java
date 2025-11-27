@@ -1,7 +1,9 @@
 package com.dau.cafeteria_portal.service.impl;
 
 import com.dau.cafeteria_portal.dto.FeedbackQuestionDTO;
+import com.dau.cafeteria_portal.dto.FeedbackResponseMapDTO;
 import com.dau.cafeteria_portal.dto.FeedbackSubmissionDTO;
+import com.dau.cafeteria_portal.dto.QuestionFeedbackMapDTO;
 import com.dau.cafeteria_portal.entity.Canteen;
 import com.dau.cafeteria_portal.entity.FeedbackQuestion;
 import com.dau.cafeteria_portal.entity.FeedbackResponse;
@@ -9,10 +11,13 @@ import com.dau.cafeteria_portal.repository.CanteenRepository;
 import com.dau.cafeteria_portal.repository.FeedbackQuestionRepository;
 import com.dau.cafeteria_portal.repository.FeedbackResponseRepository;
 import com.dau.cafeteria_portal.service.FeedbackService;
+import org.aspectj.weaver.patterns.TypePatternQuestions;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -65,13 +70,77 @@ public class FeedbackServiceImpl implements FeedbackService {
     // 🟢 Admin: View all feedback responses for a canteen
     @Override
     public List<FeedbackResponse> getFeedbackForCanteen(Long canteenId) {
-        return responseRepo.findByQuestionId(canteenId);
+        return responseRepo.findByCanteen_CanteenId(canteenId);
     }
 
-    // 🟢 User: Get all feedback questions for a canteen
+        // 🟢 User: Get all feedback questions for a canteen
     @Override
     public List<FeedbackQuestion> getQuestionsByCanteen(Long canteenId) {
         return questionRepo.findByCanteen_CanteenId(canteenId);
+    }
+    @Override
+    public List<FeedbackResponse> getFeedbackForCanteenByMonth(Long canteenId, int year, int month) {
+
+        LocalDateTime startDate = LocalDate.of(year, month, 1).atStartOfDay();
+        LocalDateTime endDate = startDate.plusMonths(1);
+
+        return responseRepo.findAllByCanteen_CanteenIdAndCreatedAtBetween(
+                canteenId,
+                startDate,
+                endDate
+        );
+    }
+
+
+    @Override
+    public List<QuestionFeedbackMapDTO> getFeedbackGroupedByQuestionsForMonth(
+            Long canteenId,
+            int month,
+            int year
+    ) {
+
+        // 1. Calculate date range for the month
+        LocalDate start = LocalDate.of(year, month, 1);
+        LocalDate end = start.withDayOfMonth(start.lengthOfMonth());
+
+        LocalDateTime startDT = start.atStartOfDay();
+        LocalDateTime endDT = end.atTime(23, 59, 59);
+
+        // 2. Get all questions of the canteen
+        List<FeedbackQuestion> questions = questionRepo.findByCanteen_CanteenId(canteenId);
+
+        List<QuestionFeedbackMapDTO> result = new ArrayList<>();
+
+        for (FeedbackQuestion q : questions) {
+
+            List<FeedbackResponse> responses =
+                    responseRepo.findAllByQuestion_IdAndCreatedAtBetween(
+                            q.getId(),
+                            startDT,
+                            endDT
+                    );
+
+            // 4. Convert responses to DTO
+            List<FeedbackResponseMapDTO> responseDTOs = responses.stream()
+                    .map(r -> {
+                        FeedbackResponseMapDTO dto = new FeedbackResponseMapDTO();
+                        dto.setId(r.getId());
+                        dto.setOption(r.getOption().toString());
+                        dto.setReason(r.getReason());
+                        dto.setCreatedAt(r.getCreatedAt());
+                        return dto;
+                    }).toList();
+
+            // 5. Create Question DTO
+            QuestionFeedbackMapDTO qdto = new QuestionFeedbackMapDTO();
+            qdto.setQuestionId(q.getId());
+            qdto.setQuestionText(q.getQuestionText());
+            qdto.setResponses(responseDTOs);
+
+            result.add(qdto);
+        }
+
+        return result;
     }
 
     // User: Submit feedback

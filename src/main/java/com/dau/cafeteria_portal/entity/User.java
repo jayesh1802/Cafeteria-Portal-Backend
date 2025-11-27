@@ -1,6 +1,7 @@
 package com.dau.cafeteria_portal.entity;
 
 import com.dau.cafeteria_portal.enums.Role;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -38,6 +39,7 @@ public class User {
         this.createdAt=LocalDateTime.now();
     }
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<Complaint> complaints;
 
 }

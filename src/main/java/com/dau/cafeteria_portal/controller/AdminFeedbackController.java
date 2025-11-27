@@ -1,6 +1,7 @@
 package com.dau.cafeteria_portal.controller;
 
 import com.dau.cafeteria_portal.dto.FeedbackQuestionDTO;
+import com.dau.cafeteria_portal.dto.QuestionFeedbackMapDTO;
 import com.dau.cafeteria_portal.entity.FeedbackQuestion;
 import com.dau.cafeteria_portal.entity.FeedbackResponse;
 import com.dau.cafeteria_portal.service.FeedbackService;
@@ -46,4 +47,26 @@ public class AdminFeedbackController {
     public ResponseEntity<List<FeedbackResponse>> getCanteenFeedback(@PathVariable Long canteenId) {
         return ResponseEntity.ok(feedbackService.getFeedbackForCanteen(canteenId));
     }
+//    @GetMapping("/canteen/{canteenId}/responses/month")
+//    public ResponseEntity<List<FeedbackResponse>> getMonthlyFeedback(
+//            @PathVariable Long canteenId,
+//            @RequestParam int year,
+//            @RequestParam int month
+//    ) {
+//        return ResponseEntity.ok(
+//                feedbackService.getFeedbackForCanteenByMonth(canteenId, year, month)
+//        );
+//    }
+    @GetMapping("/canteen/{canteenId}/feedback/monthly")
+    public ResponseEntity<List<QuestionFeedbackMapDTO>> getMonthlyQuestionWiseFeedback(
+            @PathVariable Long canteenId,
+            @RequestParam int month,
+            @RequestParam int year
+    ) {
+        return ResponseEntity.ok(
+                feedbackService.getFeedbackGroupedByQuestionsForMonth(canteenId, month, year)
+        );
+    }
+
+
 }

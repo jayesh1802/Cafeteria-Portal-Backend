@@ -63,4 +63,27 @@ public class CanteenServiceImpl implements CanteenService {
         }
         canteenRepository.deleteById(id);
     }
+    @Override
+    public void updateCanteenImage(Long id, String imagePath) {
+        Canteen canteen = canteenRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Canteen not found"));
+        canteen.setImageUrl(imagePath);
+        canteenRepository.save(canteen);
+    }
+
+    @Override
+    public void updateFssaiCertificate(Long id, String certificatePath) {
+        Canteen canteen = canteenRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Canteen not found"));
+        canteen.setFssaiCertificateUrl(certificatePath);
+        canteenRepository.save(canteen);
+    }
+
+    @Override
+    public void updateMenuFile(Long id, String menuPath) {
+        Canteen canteen = canteenRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Canteen not found"));
+        canteen.setMenuFilePath(menuPath);
+        canteenRepository.save(canteen);
+    }
 }
