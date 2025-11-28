@@ -9,5 +9,6 @@ public interface CommitteeService {
     MemberDTO addMember(MemberDTO dto);
     MemberDTO updateMember(Long id, MemberDTO dto);
     void deleteMember(Long id);
+    void updatePhotoUrl(Long id, String photoUrl);
 
 }

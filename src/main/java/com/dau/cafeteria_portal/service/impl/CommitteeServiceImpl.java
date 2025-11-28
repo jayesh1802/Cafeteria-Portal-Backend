@@ -66,6 +66,7 @@ public class CommitteeServiceImpl implements CommitteeService {
         repo.save(m);
     }
 
+
     private void fillEntity(CommitteeMember m, MemberDTO dto) {
         m.setName(dto.getName());
         m.setEmail(dto.getEmail());
@@ -74,4 +75,15 @@ public class CommitteeServiceImpl implements CommitteeService {
         m.setRole(CommitteeRole.valueOf(dto.getRole()));
         m.setStudentId(dto.getStudentId());
     }
+
+    // Implementation
+    @Override
+    public void updatePhotoUrl(Long id, String photoUrl) {
+        CommitteeMember m = repo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Member not found"));
+
+        m.setPhotoUrl(photoUrl);
+        repo.save(m);
+    }
+
 }
