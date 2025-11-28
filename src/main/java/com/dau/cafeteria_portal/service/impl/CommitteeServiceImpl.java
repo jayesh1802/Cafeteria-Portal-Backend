@@ -63,7 +63,7 @@ public class CommitteeServiceImpl implements CommitteeService {
                 .orElseThrow(() -> new RuntimeException("Member not found"));
 
         m.setActive(false);
-        repo.save(m);
+        repo.delete(m);
     }
 
 
