@@ -5,5 +5,5 @@ import jakarta.mail.MessagingException;
 import java.io.File;
 
 public interface EscalationMailService {
-    void sendEscalationMail(String to, String subject, String htmlBody, String attachment) throws MessagingException;
+    void sendEscalationMail(String to, String subject, String htmlBody, File attachment) throws MessagingException;
 }

@@ -16,23 +16,23 @@ public class EscalationMailServiceImpl implements  EscalationMailService {
 
     private final JavaMailSender mailSender;
 
-    public void sendEscalationMail(String to, String subject, String htmlBody, String attachmentPath)
+    public void sendEscalationMail(String to, String subject, String htmlBody, File attachmentPath)
             throws MessagingException {
 
         MimeMessage message = mailSender.createMimeMessage();
-
         MimeMessageHelper helper = new MimeMessageHelper(message, true);
 
         helper.setTo(to);
         helper.setSubject(subject);
-        helper.setText(htmlBody, true); // HTML allowed
+        helper.setText(htmlBody, true);
 
         if (attachmentPath != null) {
-            FileSystemResource file = new FileSystemResource(new File(attachmentPath));
-            helper.addAttachment("complaint_attachment", file);
+            FileSystemResource file = new FileSystemResource(attachmentPath);
+            helper.addAttachment(attachmentPath.getName(), file);
         }
 
         mailSender.send(message);
     }
+
 }
 

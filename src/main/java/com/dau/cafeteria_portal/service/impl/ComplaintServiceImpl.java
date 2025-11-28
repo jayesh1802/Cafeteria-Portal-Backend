@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.util.List;
 import java.util.Optional;
 
@@ -107,32 +108,32 @@ public class ComplaintServiceImpl implements ComplaintService {
                 .orElseThrow(() -> new RuntimeException("Complaint not found"));
 
         String subject = "Complaint to be escalated: " + complaint.getTitle();
-        String body = "<h3>Dear CMC,</h3>"
-                + "<p>Please look at the following complaint.</p>"
-                + "<p><b>Title:</b> " + complaint.getTitle() + "</p>"
-                + "<p><b>Description:</b> " + complaint.getDescription() + "</p>";
+
+        String body = "Dear CMC,<br><br>"
+                + "Please look at the following complaint.<br><br>"
+                + "<b>Title:</b> " + complaint.getTitle() + "<br>"
+                + "<b>Description:</b> " + complaint.getDescription() + "<br>";
+
+        File attachment = null;
+
+        if (complaint.getImageKey() != null) {
+            attachment = s3Service.downloadToTempFile(complaint.getImageKey());
+        }
 
         try {
-            String attachmentPath = null;
-
-            // Only download if a file exists
-            if (complaint.getImageKey() != null) {
-                attachmentPath = s3Service.downloadToTempFile(complaint.getImageKey());
-            }
-
             escalationMailService.sendEscalationMail(
                     "cmc@dau.ac.in",
                     subject,
                     body,
-                    attachmentPath
+                    attachment
             );
-
             return "Complaint escalated and email sent to CMC.";
 
-        } catch (Exception e) {
+        } catch (MessagingException e) {
             throw new RuntimeException("Failed to send escalation mail: " + e.getMessage());
         }
     }
+
 
     @Override
     public void attachFile(Long complaintId, String fileKey, String emailId) {
