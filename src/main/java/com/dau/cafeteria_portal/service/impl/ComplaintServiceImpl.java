@@ -102,34 +102,38 @@ public class ComplaintServiceImpl implements ComplaintService {
         return s3Service.generatePresignedDownloadUrl(c.getImageKey());
     }
     @Override
-    public String escalateComplaint(Long complaintId){
+    public String escalateComplaint(Long complaintId) {
         Complaint complaint = complaintRepository.findById(complaintId)
                 .orElseThrow(() -> new RuntimeException("Complaint not found"));
 
-        //later we can use LLM to generate body...
-
-        String subject = "Complaint to be escalated" + complaint.getTitle();
-        String body = "<h3>Complaint Escalated</h3>"
+        String subject = "Complaint to be escalated: " + complaint.getTitle();
+        String body = "<h3>Dear CMC,</h3>"
+                + "<p>Please look at the following complaint.</p>"
                 + "<p><b>Title:</b> " + complaint.getTitle() + "</p>"
                 + "<p><b>Description:</b> " + complaint.getDescription() + "</p>";
-        // add image thing after AWS
-        // as of now hard coded then later add the proper image path etc, will have to modify each section for this..
-        String attachmentPath="path";
-        try{
+
+        try {
+            String attachmentPath = null;
+
+            // Only download if a file exists
+            if (complaint.getImageKey() != null) {
+                attachmentPath = s3Service.downloadToTempFile(complaint.getImageKey());
+            }
+
             escalationMailService.sendEscalationMail(
                     "cmc@dau.ac.in",
                     subject,
                     body,
                     attachmentPath
             );
+
             return "Complaint escalated and email sent to CMC.";
-        }catch(MessagingException e){
-//            e.printStackTrace();
+
+        } catch (Exception e) {
             throw new RuntimeException("Failed to send escalation mail: " + e.getMessage());
-
         }
-
     }
+
     @Override
     public void attachFile(Long complaintId, String fileKey, String emailId) {
         Complaint c = complaintRepository.findById(complaintId)
