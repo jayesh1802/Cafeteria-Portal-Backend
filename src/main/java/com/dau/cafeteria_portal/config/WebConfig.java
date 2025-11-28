@@ -15,5 +15,7 @@ public class WebConfig implements WebMvcConfigurer {
                 .addResourceLocations("file:C:/cafeteria-data/certificates/");
         registry.addResourceHandler("/menus/**")
                 .addResourceLocations("file:C:/cafeteria-data/menus/");
+        registry.addResourceHandler("/committee_photos/**")
+                .addResourceLocations("file:C:/cafeteria-data/committee_photos/");
     }
 }
