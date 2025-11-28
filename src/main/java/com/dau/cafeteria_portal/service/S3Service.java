@@ -4,4 +4,5 @@ public interface S3Service {
     String generatePresignedUploadUrl(String key);
     String generatePresignedDownloadUrl(String key);
     String buildKeyForComplaint(Long complaintId, String originalFileName);
+    String downloadToTempFile(String key);
 }

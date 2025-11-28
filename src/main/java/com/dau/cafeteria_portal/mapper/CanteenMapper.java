@@ -16,6 +16,7 @@ public class CanteenMapper {
         dto.setInfo(canteen.getInfo());
         dto.setFssaiCertificateUrl(canteen.getFssaiCertificateUrl());
         dto.setImageUrl(canteen.getImageUrl());
+        dto.setMenuFilePath(canteen.getMenuFilePath());
         return dto;
     }
 
@@ -28,6 +29,7 @@ public class CanteenMapper {
         canteen.setInfo(dto.getInfo());
         canteen.setFssaiCertificateUrl(dto.getFssaiCertificateUrl());
         canteen.setImageUrl(dto.getImageUrl());
+        canteen.setMenuFilePath(dto.getMenuFilePath());
         return canteen;
     }
 }

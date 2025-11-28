@@ -40,29 +40,30 @@ public class ComplaintServiceImpl implements ComplaintService {
 
     @Override
     public ComplaintDTO createComplaint(ComplaintDTO dto, String emailId, Long canteenId) {
-        // find the user by emailId
-        User user = userRepository.findByEmailId(emailId)
-                .orElseThrow(() -> new RuntimeException("User not found with email: " + emailId));
-        Canteen canteen=canteenRepository.findById(canteenId)
-                .orElseThrow(()->new RuntimeException("Canteen not found "));
-        Complaint complaint = ComplaintMapper.toEntity(dto, user,canteen);
-        complaint.setComplaintStatus(ComplaintStatus.PENDING); // default
 
+        User user = userRepository.findByEmailId(emailId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        Canteen canteen = canteenRepository.findById(canteenId)
+                .orElseThrow(() -> new RuntimeException("Canteen not found"));
+
+        Complaint complaint = ComplaintMapper.toEntity(dto, user, canteen);
+        complaint.setComplaintStatus(ComplaintStatus.PENDING);
+
+        // Save the complaint WITHOUT imageKey
         Complaint saved = complaintRepository.save(complaint);
 
-        // If user will upload an image, provide a key and upload URL.
-        // We don't enforce uploading - user may skip file.
-        String generatedKey=s3Service.buildKeyForComplaint(saved.getComplainId(), "upload");
-        saved.setImageKey(generatedKey);
-        saved = complaintRepository.save(saved);
-
+        // Build a presigned upload URL for the user to upload the image
+        String generatedKey = s3Service.buildKeyForComplaint(saved.getComplainId(), "upload");
         String uploadUrl = s3Service.generatePresignedUploadUrl(generatedKey);
 
+        // Return DTO WITH uploadUrl but WITHOUT saving imageKey yet
         ComplaintDTO result = ComplaintMapper.toDTO(saved);
         result.setUploadUrl(uploadUrl);
-        result.setImageKey(generatedKey);
+        result.setImageKey(generatedKey);   // FRONTEND will use this in /attach
+
         return result;
     }
+
 
     @Override
     public List<ComplaintDTO> getMyComplaints(String emailId) {
@@ -100,21 +101,54 @@ public class ComplaintServiceImpl implements ComplaintService {
         if (c.getImageKey() == null) throw new RuntimeException("No image present");
         return s3Service.generatePresignedDownloadUrl(c.getImageKey());
     }
+//    @Override
+//    public String escalateComplaint(Long complaintId){
+//        Complaint complaint = complaintRepository.findById(complaintId)
+//                .orElseThrow(() -> new RuntimeException("Complaint not found"));
+//
+//        //later we can use LLM to generate body...
+//
+//        String subject = "Complaint to be escalated" + complaint.getTitle();
+//        String body = "<h3>Complaint </h3>"
+//                + "<p><b>Title:</b> " + complaint.getTitle() + "</p>"
+//                + "<p><b>Description:</b> " + complaint.getDescription() + "</p>";
+//        String attachmentPath="path";
+//        try{
+//            escalationMailService.sendEscalationMail(
+//                    "cmc@dau.ac.in",
+//                    subject,
+//                    body,
+//                    attachmentPath
+//            );
+//            return "Complaint escalated and email sent to CMC.";
+//        }catch(MessagingException e){
+////            e.printStackTrace();
+//            throw new RuntimeException("Failed to send escalation mail: " + e.getMessage());
+//
+//        }
+//
+//    }
     @Override
-    public String escalateComplaint(Long complaintId){
+    public String escalateComplaint(Long complaintId) {
+
         Complaint complaint = complaintRepository.findById(complaintId)
                 .orElseThrow(() -> new RuntimeException("Complaint not found"));
 
-        //later we can use LLM to generate body...
+        String subject = "Complaint to be escalated: " + complaint.getTitle();
 
-        String subject = "Mail to Higher Authorities " + complaint.getTitle();
-        String body = "<h3>Complaint Escalated</h3>"
-                + "<p><b>Title:</b> " + complaint.getTitle() + "</p>"
-                + "<p><b>Description:</b> " + complaint.getDescription() + "</p>";
-        // add image thing after AWS
-        // as of now hard coded then later add the proper image path etc, will have to modify each section for this..
-        String attachmentPath="path";
-        try{
+        String body =
+                "Dear CMC,<br><br>" +
+                        "Please look at the following complaint:<br><br>" +
+                        "<b>Title:</b> " + complaint.getTitle() + "<br>" +
+                        "<b>Description:</b> " + complaint.getDescription() + "<br><br>";
+
+        // ---- Download AWS attachment if exists ----
+        String attachmentPath = null;
+        if (complaint.getImageKey() != null) {
+            attachmentPath = s3Service.downloadToTempFile(complaint.getImageKey());
+        }
+
+        try {
             escalationMailService.sendEscalationMail(
                     "cmc@dau.ac.in",
                     subject,
@@ -122,12 +156,9 @@ public class ComplaintServiceImpl implements ComplaintService {
                     attachmentPath
             );
             return "Complaint escalated and email sent to CMC.";
-        }catch(MessagingException e){
-//            e.printStackTrace();
+        } catch (MessagingException e) {
             throw new RuntimeException("Failed to send escalation mail: " + e.getMessage());
-
         }
-
     }
     @Override
     public void attachFile(Long complaintId, String fileKey, String emailId) {

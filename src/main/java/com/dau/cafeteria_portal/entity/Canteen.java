@@ -19,7 +19,6 @@ public class Canteen {
     private String fssaiCertificateUrl;
     private String imageUrl;
     private String menuFilePath; // Menu file path
-
     @OneToMany(mappedBy = "canteen", cascade = CascadeType.ALL)
     @JsonIgnore
     private List<FeedbackQuestion> feedbackQuestions;

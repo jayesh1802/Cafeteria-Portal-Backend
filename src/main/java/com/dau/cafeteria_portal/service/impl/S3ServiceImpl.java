@@ -3,12 +3,16 @@ package com.dau.cafeteria_portal.service.impl;
 import com.amazonaws.HttpMethod;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
+import com.amazonaws.services.s3.model.S3Object;
+import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import com.dau.cafeteria_portal.service.S3Service;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.net.URL;
 import java.util.Date;
 import java.util.UUID;
@@ -31,9 +35,11 @@ public class S3ServiceImpl implements S3Service {
     @Override
     public String generatePresignedUploadUrl(String key) {
         Date expiration = new Date(System.currentTimeMillis() + uploadExpiryMinutes * 60L * 1000L);
+
         GeneratePresignedUrlRequest req = new GeneratePresignedUrlRequest(bucket, key)
                 .withMethod(HttpMethod.PUT)
                 .withExpiration(expiration);
+
         URL url = amazonS3.generatePresignedUrl(req);
         return url.toString();
     }
@@ -41,20 +47,47 @@ public class S3ServiceImpl implements S3Service {
     @Override
     public String generatePresignedDownloadUrl(String key) {
         Date expiration = new Date(System.currentTimeMillis() + downloadExpiryMinutes * 60L * 1000L);
+
         GeneratePresignedUrlRequest req = new GeneratePresignedUrlRequest(bucket, key)
                 .withMethod(HttpMethod.GET)
                 .withExpiration(expiration);
+
         URL url = amazonS3.generatePresignedUrl(req);
         return url.toString();
     }
 
     @Override
     public String buildKeyForComplaint(Long complaintId, String originalFileName) {
-        // Keep key stable: complaints/{id}/{uuid}_{filename}
         String ext = "";
         int idx = originalFileName.lastIndexOf('.');
         if (idx > 0) ext = originalFileName.substring(idx);
+
         String uuid = UUID.randomUUID().toString();
         return String.format("complaints/%d/%s%s", complaintId, uuid, ext);
+    }
+
+    @Override
+    public String downloadToTempFile(String key) {
+        try {
+            File temp = File.createTempFile("complaint_", "_" + System.currentTimeMillis());
+
+            S3Object s3Object = amazonS3.getObject(bucket, key); // FIXED
+
+            try (S3ObjectInputStream input = s3Object.getObjectContent();
+                 FileOutputStream output = new FileOutputStream(temp)) {
+
+                byte[] buffer = new byte[1024];
+                int len;
+
+                while ((len = input.read(buffer)) != -1) {
+                    output.write(buffer, 0, len);
+                }
+            }
+
+            return temp.getAbsolutePath();
+
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to download file from S3: " + e.getMessage());
+        }
     }
 }
