@@ -101,54 +101,21 @@ public class ComplaintServiceImpl implements ComplaintService {
         if (c.getImageKey() == null) throw new RuntimeException("No image present");
         return s3Service.generatePresignedDownloadUrl(c.getImageKey());
     }
-//    @Override
-//    public String escalateComplaint(Long complaintId){
-//        Complaint complaint = complaintRepository.findById(complaintId)
-//                .orElseThrow(() -> new RuntimeException("Complaint not found"));
-//
-//        //later we can use LLM to generate body...
-//
-//        String subject = "Complaint to be escalated" + complaint.getTitle();
-//        String body = "<h3>Complaint </h3>"
-//                + "<p><b>Title:</b> " + complaint.getTitle() + "</p>"
-//                + "<p><b>Description:</b> " + complaint.getDescription() + "</p>";
-//        String attachmentPath="path";
-//        try{
-//            escalationMailService.sendEscalationMail(
-//                    "cmc@dau.ac.in",
-//                    subject,
-//                    body,
-//                    attachmentPath
-//            );
-//            return "Complaint escalated and email sent to CMC.";
-//        }catch(MessagingException e){
-////            e.printStackTrace();
-//            throw new RuntimeException("Failed to send escalation mail: " + e.getMessage());
-//
-//        }
-//
-//    }
     @Override
-    public String escalateComplaint(Long complaintId) {
-
+    public String escalateComplaint(Long complaintId){
         Complaint complaint = complaintRepository.findById(complaintId)
                 .orElseThrow(() -> new RuntimeException("Complaint not found"));
 
-        String subject = "Complaint to be escalated: " + complaint.getTitle();
+        //later we can use LLM to generate body...
 
-        String body =
-                "Dear CMC,<br><br>" +
-                        "Please look at the following complaint:<br><br>" +
-                        "<b>Title:</b> " + complaint.getTitle() + "<br>" +
-                        "<b>Description:</b> " + complaint.getDescription() + "<br><br>";
-
-        // ---- Download AWS attachment if exists ----
-        String attachmentPath = null;
-        if (complaint.getImageKey() != null) {
-            attachmentPath = s3Service.downloadToTempFile(complaint.getImageKey());
-        }
-
-        try {
+        String subject = "Complaint to be escalated" + complaint.getTitle();
+        String body = "<h3>Complaint Escalated</h3>"
+                + "<p><b>Title:</b> " + complaint.getTitle() + "</p>"
+                + "<p><b>Description:</b> " + complaint.getDescription() + "</p>";
+        // add image thing after AWS
+        // as of now hard coded then later add the proper image path etc, will have to modify each section for this..
+        String attachmentPath="path";
+        try{
             escalationMailService.sendEscalationMail(
                     "cmc@dau.ac.in",
                     subject,
@@ -156,9 +123,12 @@ public class ComplaintServiceImpl implements ComplaintService {
                     attachmentPath
             );
             return "Complaint escalated and email sent to CMC.";
-        } catch (MessagingException e) {
+        }catch(MessagingException e){
+//            e.printStackTrace();
             throw new RuntimeException("Failed to send escalation mail: " + e.getMessage());
+
         }
+
     }
     @Override
     public void attachFile(Long complaintId, String fileKey, String emailId) {

@@ -69,16 +69,24 @@ public class S3ServiceImpl implements S3Service {
     @Override
     public String downloadToTempFile(String key) {
         try {
-            File temp = File.createTempFile("complaint_", "_" + System.currentTimeMillis());
+            // Extract filename and extension from key
+            String originalName = key.substring(key.lastIndexOf('/') + 1); // photo.png
+            String prefix = "complaint_";
+            String suffix = originalName.contains(".")
+                    ? originalName.substring(originalName.lastIndexOf('.'))
+                    : ""; // default no-ext case
 
-            S3Object s3Object = amazonS3.getObject(bucket, key); // FIXED
+            // Create temp file with correct extension
+            File temp = File.createTempFile(prefix, suffix);
+
+            // Download object
+            S3Object s3Object = amazonS3.getObject(bucket, key);
 
             try (S3ObjectInputStream input = s3Object.getObjectContent();
                  FileOutputStream output = new FileOutputStream(temp)) {
 
                 byte[] buffer = new byte[1024];
                 int len;
-
                 while ((len = input.read(buffer)) != -1) {
                     output.write(buffer, 0, len);
                 }
@@ -90,4 +98,5 @@ public class S3ServiceImpl implements S3Service {
             throw new RuntimeException("Failed to download file from S3: " + e.getMessage());
         }
     }
+
 }

@@ -2,6 +2,8 @@ package com.dau.cafeteria_portal.service;
 
 import jakarta.mail.MessagingException;
 
+import java.io.File;
+
 public interface EscalationMailService {
-    public void sendEscalationMail(String toEmail, String subject,String messageBody, String attachmentPath) throws MessagingException;
+    void sendEscalationMail(String to, String subject, String htmlBody, String attachment) throws MessagingException;
 }
