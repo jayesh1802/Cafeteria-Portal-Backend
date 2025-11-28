@@ -107,12 +107,14 @@ public class ComplaintServiceImpl implements ComplaintService {
         Complaint complaint = complaintRepository.findById(complaintId)
                 .orElseThrow(() -> new RuntimeException("Complaint not found"));
 
+        // --- ADDED DEFINITIONS FOR subject AND body ---
         String subject = "Complaint to be escalated: " + complaint.getTitle();
 
         String body = "Dear CMC,<br><br>"
                 + "Please look at the following complaint.<br><br>"
                 + "<b>Title:</b> " + complaint.getTitle() + "<br>"
                 + "<b>Description:</b> " + complaint.getDescription() + "<br>";
+        // ---------------------------------------------
 
         File attachment = null;
 
@@ -131,9 +133,17 @@ public class ComplaintServiceImpl implements ComplaintService {
 
         } catch (MessagingException e) {
             throw new RuntimeException("Failed to send escalation mail: " + e.getMessage());
+        } finally {
+            // --- ADD FINALLY BLOCK FOR CLEANUP (As previously recommended) ---
+            if (attachment != null) {
+                // Deleting the temporary file
+                if (!attachment.delete()) {
+                    // You might want to replace this with a logger statement in a real application
+                    System.err.println("Warning: Could not delete temporary attachment file: " + attachment.getAbsolutePath());
+                }
+            }
         }
     }
-
 
     @Override
     public void attachFile(Long complaintId, String fileKey, String emailId) {
